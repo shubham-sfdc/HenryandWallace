@@ -1,0 +1,38 @@
+public class clsLeaseAgreement 
+{
+    public Lease_Agreement__c objLA {get;set;}
+    public list<Lease_Agreement__c> lstLeaseAgreement {get;set;}
+    public Closing__c objclosing {get;set;}
+    public list<Closing__c> lstClosing {get;set;}
+    public string strLeaseAgreementcontent {get;set;}
+    
+    
+    public clsLeaseAgreement()
+    {
+        string table ='<table border="1" style="border-collapse: collapse width:100%"><tr><th>Lease Year(s)</th><th>Rent Per Sq. Ft.</th><th>Annual Rent</th><th>Monthly Rent</th></tr><tr><td>1</td><td>test</td><td>Test</td><td>123324</td></tr></table>';
+        string recordid = ApexPages.currentPage().getParameters().get('id');
+        objclosing = new Closing__c();
+        lstLeaseAgreement = new list<Lease_Agreement__c>();
+        lstLeaseAgreement = [SELECT id,Lease_Agreement_Content__c from Lease_Agreement__c LIMIT 1];
+        if(recordid !=null)
+        {
+            lstClosing = [Select id,Property_Owner__c,name,Tenant_Account__c,Space_Detail__c,Property__c,Property_Address__c,Tenant_space_square_feet__c,Tenant_space_floor__c,Occupancy_Timeline_Months__c,Sub_Type__c,Type_of_Tenant__c from Closing__c where id =: recordid];
+            if(lstClosing.size()>0)
+            {
+                objclosing = lstClosing[0];
+            }
+        }
+        
+        if(lstLeaseAgreement.size()>0)
+        {
+            string temptenantsqft = string.valueof(objclosing.Tenant_space_square_feet__c);
+            string temptenantspacefloor = string.valueof(objclosing.Tenant_space_floor__c);
+            
+            objLA = lstLeaseAgreement[0];
+            strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Owner__c).replaceAll('\\*\\*'+'PotentialTenant'+'\\*\\*',objclosing.Tenant_Account__c).replaceAll('\\*\\*'+'SpaceDetail'+'\\*\\*',objclosing.Space_Detail__c).replaceAll('\\*\\*'+'Propertyname'+'\\*\\*',objclosing.Property__c).replaceAll('\\*\\*'+'PropertyAddress'+'\\*\\*',objclosing.Property_Address__c).replaceAll('\\*\\*'+'Tenantspacesquarefeet'+'\\*\\*',temptenantsqft).replaceAll('\\*\\*'+'Tenantspacefloor#'+'\\*\\*',temptenantspacefloor).replaceAll('\\*\\*'+'Leaseterm'+'\\*\\*',objclosing.Occupancy_Timeline_Months__c).replaceAll('\\*\\*'+'Typeoftenantsubtype'+'\\*\\*',objclosing.Sub_Type__c).replaceAll('\\*\\*'+'Typeoftenant'+'\\*\\*',objclosing.Type_of_Tenant__c).replaceAll('\\*\\*'+'Tabletobeadded'+'\\*\\*',table);
+            
+        }
+        
+    }
+    
+}
