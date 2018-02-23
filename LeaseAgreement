@@ -1,0 +1,32 @@
+<apex:page Controller="clsLeaseAgreement" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" renderAs="pdf">
+<slds/>
+    <head>
+        <style>
+            @page {
+                size: letter;
+                margin: 25mm;
+                width:20%;
+                
+                @bottom-center {
+                    content: counter(page);
+                }
+            }
+            .page-break {
+                display:block;
+                page-break-after:always;
+            }
+            body {
+                
+            }
+        </style>
+    </head>
+    <apex:outputpanel id="idpanel">
+    <div class="slds-scope">
+      <body>
+           <apex:outputText value="{!strLeaseAgreementcontent}" escape="false"/>
+        </body>
+    </div>
+    </apex:outputpanel>
+     
+     
+</apex:page>
