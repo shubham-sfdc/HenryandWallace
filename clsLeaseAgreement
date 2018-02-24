@@ -5,18 +5,21 @@ public class clsLeaseAgreement
     public Closing__c objclosing {get;set;}
     public list<Closing__c> lstClosing {get;set;}
     public string strLeaseAgreementcontent {get;set;}
+    string recordid;
+    public Boolean initialised{get; set;}
     
     
     public clsLeaseAgreement()
     {
+        initialised= false;
         string table ='<table border="1" style="border-collapse: collapse width:100%"><tr><th>Lease Year(s)</th><th>Rent Per Sq. Ft.</th><th>Annual Rent</th><th>Monthly Rent</th></tr><tr><td>1</td><td>test</td><td>Test</td><td>123324</td></tr></table>';
-        string recordid = ApexPages.currentPage().getParameters().get('id');
+        recordid = ApexPages.currentPage().getParameters().get('id');
         objclosing = new Closing__c();
         lstLeaseAgreement = new list<Lease_Agreement__c>();
-        lstLeaseAgreement = [SELECT id,Lease_Agreement_Content__c from Lease_Agreement__c LIMIT 1];
+        lstLeaseAgreement = [SELECT id,Name,Lease_Agreement_Content__c from Lease_Agreement__c LIMIT 1];
         if(recordid !=null)
         {
-            lstClosing = [Select id,Property_Owner__c,name,Tenant_Account__c,Space_Detail__c,Property__c,Property_Address__c,Tenant_space_square_feet__c,Tenant_space_floor__c,Occupancy_Timeline_Months__c,Sub_Type__c,Type_of_Tenant__c from Closing__c where id =: recordid];
+            lstClosing = [Select id,Property_Owner__c,name,Tenant_Account__c,Space_Detail__c,Property__c,Property_Address__c,Tenant_space_square_feet__c,Tenant_space_floor__c,Occupancy_Timeline_Months__c,Sub_Type__c,Type_of_Tenant__c,Possession_Date__c,X1st_Month_Rent__c, Deposit__c, Construction_Start_Date__c, Construction_Completion_Date__c,Lease_Extension_Months__c,Expected_Space_Delivery__c from Closing__c where id =: recordid];
             if(lstClosing.size()>0)
             {
                 objclosing = lstClosing[0];
@@ -27,12 +30,62 @@ public class clsLeaseAgreement
         {
             string temptenantsqft = string.valueof(objclosing.Tenant_space_square_feet__c);
             string temptenantspacefloor = string.valueof(objclosing.Tenant_space_floor__c);
+            string strdeposit = string.valueOf(objclosing.Deposit__c);
+            string strmonthrent = string.valueOf(objclosing.X1st_Month_Rent__c);
+            string Deposit1stmonthrent = string.valueof(objclosing.Deposit__c + objclosing.X1st_Month_Rent__c);
+            string possesiondate = string.valueof(objclosing.Possession_Date__c);
+            string startdate = string.valueOf(objclosing.Construction_Start_Date__c);
+            string enddate = string.valueOf(objclosing.Construction_Completion_Date__c);
             
             objLA = lstLeaseAgreement[0];
-            strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Owner__c).replaceAll('\\*\\*'+'PotentialTenant'+'\\*\\*',objclosing.Tenant_Account__c).replaceAll('\\*\\*'+'SpaceDetail'+'\\*\\*',objclosing.Space_Detail__c).replaceAll('\\*\\*'+'Propertyname'+'\\*\\*',objclosing.Property__c).replaceAll('\\*\\*'+'PropertyAddress'+'\\*\\*',objclosing.Property_Address__c).replaceAll('\\*\\*'+'Tenantspacesquarefeet'+'\\*\\*',temptenantsqft).replaceAll('\\*\\*'+'Tenantspacefloor#'+'\\*\\*',temptenantspacefloor).replaceAll('\\*\\*'+'Leaseterm'+'\\*\\*',objclosing.Occupancy_Timeline_Months__c).replaceAll('\\*\\*'+'Typeoftenantsubtype'+'\\*\\*',objclosing.Sub_Type__c).replaceAll('\\*\\*'+'Typeoftenant'+'\\*\\*',objclosing.Type_of_Tenant__c).replaceAll('\\*\\*'+'Tabletobeadded'+'\\*\\*',table);
             
+            strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Owner__c).replaceAll('\\*\\*'+'PotentialTenant'+'\\*\\*',objclosing.Tenant_Account__c).replaceAll('\\*\\*'+'SpaceDetail'+'\\*\\*',objclosing.Space_Detail__c).replaceAll('\\*\\*'+'Propertyname'+'\\*\\*',objclosing.Property__c).replaceAll('\\*\\*'+'PropertyAddress'+'\\*\\*',objclosing.Property_Address__c).replaceAll('\\*\\*'+'Tenantspacesquarefeet'+'\\*\\*',temptenantsqft).replaceAll('\\*\\*'+'Tenantspacefloor#'+'\\*\\*',temptenantspacefloor).replaceAll('\\*\\*'+'Leaseterm'+'\\*\\*',objclosing.Occupancy_Timeline_Months__c).replaceAll('\\*\\*'+'Typeoftenantsubtype'+'\\*\\*',objclosing.Sub_Type__c).replaceAll('\\*\\*'+'Typeoftenant'+'\\*\\*',objclosing.Type_of_Tenant__c).replaceAll('\\*\\*'+'Tabletobeadded'+'\\*\\*',table).replaceAll('\\*\\*'+'PossessionDate'+'\\*\\*',possesiondate).replaceAll('\\*\\*'+'#ofmonths'+'\\*\\*',objclosing.Lease_Extension_Months__c).replaceAll('\\*\\*'+'Deposit'+'\\*\\*',strdeposit).replaceAll('\\*\\*'+'1stmonthrent'+'\\*\\*',strmonthrent).replaceAll('\\*\\*'+'Deposit1stmonthrent'+'\\*\\*',Deposit1stmonthrent).replaceAll('\\*\\*'+'Contructionstartdate'+'\\*\\*',startdate).replaceAll('\\*\\*'+'Contructionenddate'+'\\*\\*',enddate).replaceAll('\\*\\*'+'Expectedspacedelivery'+'\\*\\*',objclosing.Expected_Space_Delivery__c);
+            
+           /* if(objclosing.Property_Owner__c != null && objclosing.Property_Owner__c != '')
+                strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Address__c);
+            else
+                strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',' ');
+            */
         }
         
+    }
+    public void saveAttachement() 
+    {
+        if (!initialised && recordid !=NULL) {
+
+         PageReference pdf = Page.LeaseAgreement;
+         pdf.getParameters().put('id', recordid);
+        system.debug(pdf+'.....pdf...');
+        Blob pdfBlob ;
+        pdfBlob = pdf.getContent();
+        // create the new attachment
+        Attachment attach = new Attachment();
+
+        // the contents of the attachment from the pdf
+        //Blob body;
+
+        try {
+
+            // returns the output of the page as a PDF
+            //body = pdf.getContentAsPDF();
+            system.debug('body should be fine');
+
+            // need to pass unit test -- current bug    
+            } catch (VisualforceException e) {
+                system.debug('in the catch block');
+                 pdfBlob = Blob.valueOf('Some Text');
+            }
+
+            attach.Body = pdfBlob;
+        // add the user entered name
+        attach.Name = objclosing.name +'.pdf';
+        attach.IsPrivate = false;
+        // attach the pdf to the account
+        attach.ParentId = objclosing.Id;
+        insert attach;
+       system.debug(attach);
+        initialised=true;
+      } else system.debug('tried to run twice');
     }
     
 }
