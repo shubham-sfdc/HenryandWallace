@@ -1,4 +1,5 @@
-<apex:page Controller="clsLeaseAgreement" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" renderAs="pdf">
+<apex:page Controller="clsLeaseAgreement" showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" renderAs="pdf" >
+
 <slds/>
     <head>
         <style>
