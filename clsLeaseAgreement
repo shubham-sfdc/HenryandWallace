@@ -12,20 +12,40 @@ public class clsLeaseAgreement
     public clsLeaseAgreement()
     {
         initialised= false;
-        string table ='<table border="1" style="border-collapse: collapse width:100%"><tr><th>Lease Year(s)</th><th>Rent Per Sq. Ft.</th><th>Annual Rent</th><th>Monthly Rent</th></tr><tr><td>1</td><td>test</td><td>Test</td><td>123324</td></tr></table>';
+        
         recordid = ApexPages.currentPage().getParameters().get('id');
         objclosing = new Closing__c();
         lstLeaseAgreement = new list<Lease_Agreement__c>();
         lstLeaseAgreement = [SELECT id,Name,Lease_Agreement_Content__c from Lease_Agreement__c LIMIT 1];
         if(recordid !=null)
         {
-            lstClosing = [Select id,Property_Owner__c,name,Tenant_Account__c,Space_Detail__c,Property__c,Property_Address__c,Tenant_space_square_feet__c,Tenant_space_floor__c,Occupancy_Timeline_Months__c,Sub_Type__c,Type_of_Tenant__c,Possession_Date__c,X1st_Month_Rent__c, Deposit__c, Construction_Start_Date__c, Construction_Completion_Date__c,Lease_Extension_Months__c,Expected_Space_Delivery__c from Closing__c where id =: recordid];
+            lstClosing = [Select id,Property_Owner__c,Lease_Start_Date__c,Rent_Per_Sq_Ft__c,Annual_Rent__c,Escalate_Rate__c,name,Tenant_Account__c,Space_Detail__c,Property__c,Property_Address__c,Occupancy_Timeline_Month__c,Tenant_space_square_feet__c,Tenant_space_floor__c,Occupancy_Timeline_Months__c,Sub_Type__c,Type_of_Tenant__c,Possession_Date__c,X1st_Month_Rent__c, Deposit__c, Construction_Start_Date__c, Construction_Completion_Date__c,Lease_Extension_Months__c,Expected_Space_Delivery__c from Closing__c where id =: recordid];
             if(lstClosing.size()>0)
             {
                 objclosing = lstClosing[0];
             }
         }
-        
+        Decimal RowValue = integer.valueof(objclosing.Occupancy_Timeline_Month__c);
+        Integer Row = Math.ceil(RowValue/12).intValue();
+        system.debug('Row!!!!!!'+Row);
+        string r ='';
+        string table ='<table border="1" style="border-collapse: collapse width:100;"><tr><th style="padding-Left:30px; padding-right:30px;">Lease Year(s)</th><th style="padding-Left:30px; padding-right:30px;">Rent Per Sq. Ft.</th><th style="padding-Left:30px; padding-right:30px;">Annual Rent</th><th style="padding-Left:30px; padding-right:30px;">Monthly Rent</th></tr>';
+        r += table;
+        table ='';
+        integer Annualrent = 0;
+        integer RentPerSqFt = 0; 
+        for(integer i=1; i<= Row; i++){
+            if(i==1){
+                Annualrent = integer.valueof(objclosing.Annual_Rent__c);
+                RentPerSqFt = integer.valueof(objclosing.Rent_Per_Sq_Ft__c);
+            }else{
+                Annualrent = integer.valueof(Annualrent+(Annualrent*objclosing.Escalate_Rate__c/100));
+                RentPerSqFt = integer.valueof(RentPerSqFt+(RentPerSqFt*objclosing.Escalate_Rate__c/100));
+            }
+        table ='<tr><td>'+i+'</td><td>'+RentPerSqFt+'</td><td>'+Annualrent+'</td><td>'+Annualrent/12+'</td></tr>';
+        r += table;
+        }
+        table = '</table>';
         if(lstLeaseAgreement.size()>0)
         {
             string temptenantsqft = string.valueof(objclosing.Tenant_space_square_feet__c);
@@ -36,16 +56,38 @@ public class clsLeaseAgreement
             string possesiondate = string.valueof(objclosing.Possession_Date__c);
             string startdate = string.valueOf(objclosing.Construction_Start_Date__c);
             string enddate = string.valueOf(objclosing.Construction_Completion_Date__c);
-            
+            date LeaseStartDate = objclosing.Lease_Start_Date__c;
+            string LeaseStartyear = string.valueOf(LeaseStartDate.Year());
+            string LeaseStartmonth = string.valueOf(LeaseStartDate.month());
+            string LeaseStartday = string.valueOf(LeaseStartDate.day());
+            string EscalateRate = ' '+string.valueOf(objclosing.Escalate_Rate__c)+'%' ;
             objLA = lstLeaseAgreement[0];
             
-            strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Owner__c).replaceAll('\\*\\*'+'PotentialTenant'+'\\*\\*',objclosing.Tenant_Account__c).replaceAll('\\*\\*'+'SpaceDetail'+'\\*\\*',objclosing.Space_Detail__c).replaceAll('\\*\\*'+'Propertyname'+'\\*\\*',objclosing.Property__c).replaceAll('\\*\\*'+'PropertyAddress'+'\\*\\*',objclosing.Property_Address__c).replaceAll('\\*\\*'+'Tenantspacesquarefeet'+'\\*\\*',temptenantsqft).replaceAll('\\*\\*'+'Tenantspacefloor#'+'\\*\\*',temptenantspacefloor).replaceAll('\\*\\*'+'Leaseterm'+'\\*\\*',objclosing.Occupancy_Timeline_Months__c).replaceAll('\\*\\*'+'Typeoftenantsubtype'+'\\*\\*',objclosing.Sub_Type__c).replaceAll('\\*\\*'+'Typeoftenant'+'\\*\\*',objclosing.Type_of_Tenant__c).replaceAll('\\*\\*'+'Tabletobeadded'+'\\*\\*',table).replaceAll('\\*\\*'+'PossessionDate'+'\\*\\*',possesiondate).replaceAll('\\*\\*'+'#ofmonths'+'\\*\\*',objclosing.Lease_Extension_Months__c).replaceAll('\\*\\*'+'Deposit'+'\\*\\*',strdeposit).replaceAll('\\*\\*'+'1stmonthrent'+'\\*\\*',strmonthrent).replaceAll('\\*\\*'+'Deposit1stmonthrent'+'\\*\\*',Deposit1stmonthrent).replaceAll('\\*\\*'+'Contructionstartdate'+'\\*\\*',startdate).replaceAll('\\*\\*'+'Contructionenddate'+'\\*\\*',enddate).replaceAll('\\*\\*'+'Expectedspacedelivery'+'\\*\\*',objclosing.Expected_Space_Delivery__c);
-            
-           /* if(objclosing.Property_Owner__c != null && objclosing.Property_Owner__c != '')
-                strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Address__c);
-            else
-                strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',' ');
-            */
+            strLeaseAgreementcontent = objLA.Lease_Agreement_Content__c.replaceAll('\\*\\*'+'Propertyowner'+'\\*\\*',objclosing.Property_Owner__c)
+            .replaceAll('\\*\\*'+'PotentialTenant'+'\\*\\*',objclosing.Tenant_Account__c)
+            .replaceAll('\\*\\*'+'2018'+'\\*\\*',LeaseStartyear)
+            .replaceAll('________________',+' '+LeaseStartmonth)
+            .replaceAll('____',+' '+LeaseStartday+' ')
+            .replaceAll('\\*\\*'+'SpaceDetail'+'\\*\\*',objclosing.Space_Detail__c)
+            .replaceAll('\\*\\*'+'Propertyname'+'\\*\\*',objclosing.Property__c)
+            .replaceAll('\\*\\*'+'PropertyAddress'+'\\*\\*',objclosing.Property_Address__c)
+            .replaceAll('\\*\\*'+'Tenantspacesquarefeet'+'\\*\\*',temptenantsqft)
+            .replaceAll('\\*\\*'+'Leaseterm'+'\\*\\*',objclosing.Occupancy_Timeline_Months__c)
+            .replaceAll('\\*\\*'+'Tenantspacefloor#'+'\\*\\*',temptenantspacefloor)
+            .replaceAll('\\*\\*'+'Typeoftenantsubtype'+'\\*\\*',objclosing.Sub_Type__c)
+            .replaceAll('\\*\\*'+'Typeoftenant'+'\\*\\*',objclosing.Type_of_Tenant__c)
+            .replaceAll('\\*\\*'+'Tabletobeadded'+'\\*\\*',r)
+            .replaceAll('\\*\\*'+'PossessionDate'+'\\*\\*',possesiondate)
+            .replaceAll('\\*\\*'+'#ofmonths'+'\\*\\*',objclosing.Lease_Extension_Months__c)
+            .replaceAll('\\*\\*'+'BeginingYear'+'\\*\\*',LeaseStartyear)
+            .replaceAll('\\*\\*'+'Deposit'+'\\*\\*',strdeposit)
+            .replaceAll('\\*\\*'+'1stmonthrent'+'\\*\\*',strmonthrent)
+            .replaceAll('\\*\\*'+'Deposit1stmonthrent'+'\\*\\*',Deposit1stmonthrent)
+            .replaceAll('\\*\\*'+'Contructionstartdate'+'\\*\\*',startdate)
+            .replaceAll('\\*\\*'+'Contructionenddate'+'\\*\\*',enddate)
+            .replaceAll('\\*\\*'+'Businessname'+'\\*\\*',objclosing.Tenant_Account__c)
+            .replaceAll('___%',EscalateRate)
+            .replaceAll('\\*\\*'+'Expectedspacedelivery'+'\\*\\*',objclosing.Expected_Space_Delivery__c);
         }
         
     }
@@ -53,8 +95,8 @@ public class clsLeaseAgreement
     {
         if (!initialised && recordid !=NULL) {
 
-         PageReference pdf = Page.LeaseAgreement;
-         pdf.getParameters().put('id', recordid);
+        PageReference pdf = Page.LeaseAgreement;
+        pdf.getParameters().put('id', recordid);
         system.debug(pdf+'.....pdf...');
         Blob pdfBlob ;
         pdfBlob = pdf.getContent();
